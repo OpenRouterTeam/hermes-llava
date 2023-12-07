@@ -21,17 +21,22 @@ import os
 
 os.environ["HUGGINGFACE_HUB_CACHE"] = os.getcwd() + "/weights"
 
-MODEL_NAME = "Nous-Hermes-2-Vision"
+MODEL_NAME = "Nous-Hermes-2-Vision-Alpha"
 HF_SLUG = f"NousResearch/{MODEL_NAME}"
 
+
 # url for the weights mirror
-REPLICATE_WEIGHTS_URL = "https://weights.replicate.delivery/default"
+# WEIGHTS_URL = "https://weights.replicate.delivery/default"
+
+# "https://huggingface.co/NousResearch/Nous-Hermes-2-Vision-Alpha/resolve/cb1e43865b0a23d3eb0bafcb0828e9a4db379ac8/mm_projector.bin"
+WEIGHTS_URL = "https://huggingface.co"
+
 # files to download from the weights mirrors
 weights = [
     {
         "dest": HF_SLUG,
         # git commit hash from huggingface
-        "src": f"{MODEL_NAME}/cb1e43865b0a23d3eb0bafcb0828e9a4db379ac8",
+        "src": f"{MODEL_NAME}/resolve/cb1e43865b0a23d3eb0bafcb0828e9a4db379ac8",
         "files": [
             "config.json",
             "generation_config.json",
@@ -44,15 +49,15 @@ weights = [
             "tokenizer_config.json",
         ],
     },
-    {
-        "dest": "openai/clip-vit-large-patch14-336",
-        "src": "clip-vit-large-patch14-336/ce19dc912ca5cd21c8a653c79e251e808ccabcd1",
-        "files": [
-            "config.json",
-            "preprocessor_config.json",
-            "pytorch_model.bin",
-        ],
-    },
+    # {
+    #     "dest": "openai/clip-vit-large-patch14-336",
+    #     "src": "clip-vit-large-patch14-336/ce19dc912ca5cd21c8a653c79e251e808ccabcd1",
+    #     "files": [
+    #         "config.json",
+    #         "preprocessor_config.json",
+    #         "pytorch_model.bin",
+    #     ],
+    # },
 ]
 
 
@@ -72,7 +77,7 @@ def download_weights(baseurl: str, basedest: str, files: list[str]):
     basedest.mkdir(parents=True, exist_ok=True)
     for f in files:
         dest = basedest / f
-        url = os.path.join(REPLICATE_WEIGHTS_URL, baseurl, f)
+        url = os.path.join(WEIGHTS_URL, baseurl, f)
         if not dest.exists():
             print("downloading url: ", url)
             if dest.suffix == ".json":
@@ -125,7 +130,7 @@ class Predictor(BasePredictor):
     ) -> ConcatenateIterator[str]:
         """Run a single prediction on the model"""
 
-        conv_mode = "llava_v1"
+        conv_mode = "mpt"
         conv = conv_templates[conv_mode].copy()
 
         image_data = load_image(str(image))
