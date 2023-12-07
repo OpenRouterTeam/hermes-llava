@@ -24,6 +24,7 @@ os.environ["HUGGINGFACE_HUB_CACHE"] = os.getcwd() + "/weights"
 MODEL_NAME = "Nous-Hermes-2-Vision-Alpha"
 HF_SLUG = f"NousResearch/{MODEL_NAME}"
 
+COMMIT_HASH = "cb1e43865b0a23d3eb0bafcb0828e9a4db379ac8"
 
 # url for the weights mirror
 # WEIGHTS_URL = "https://weights.replicate.delivery/default"
@@ -36,7 +37,7 @@ weights = [
     {
         "dest": HF_SLUG,
         # git commit hash from huggingface
-        "src": f"{MODEL_NAME}/resolve/cb1e43865b0a23d3eb0bafcb0828e9a4db379ac8",
+        "src": f"{HF_SLUG}/resolve/{COMMIT_HASH}",
         "files": [
             "config.json",
             "generation_config.json",
@@ -130,7 +131,7 @@ class Predictor(BasePredictor):
     ) -> ConcatenateIterator[str]:
         """Run a single prediction on the model"""
 
-        conv_mode = "mpt"
+        conv_mode = "llava_llama_2"
         conv = conv_templates[conv_mode].copy()
 
         image_data = load_image(str(image))
