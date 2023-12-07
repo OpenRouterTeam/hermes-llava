@@ -131,7 +131,7 @@ class Predictor(BasePredictor):
     ) -> ConcatenateIterator[str]:
         """Run a single prediction on the model"""
 
-        conv_mode = "llava_llama_2"
+        conv_mode = "mpt"
         conv = conv_templates[conv_mode].copy()
 
         image_data = load_image(str(image))
@@ -159,8 +159,7 @@ class Predictor(BasePredictor):
             .unsqueeze(0)
             .cuda()
         )
-        stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
-        keywords = [stop_str]
+        keywords = [conv.sep, conv.sep2]
         stopping_criteria = KeywordsStoppingCriteria(
             keywords, self.tokenizer, input_ids
         )
@@ -189,12 +188,13 @@ class Predictor(BasePredictor):
                 if new_text == " ":
                     prepend_space = True
                     continue
-                if new_text.endswith(stop_str):
-                    new_text = new_text[: -len(stop_str)].strip()
-                    prepend_space = False
-                elif prepend_space:
-                    new_text = " " + new_text
-                    prepend_space = False
+                for stop_str in keywords:
+                    if new_text.endswith(stop_str):
+                        new_text = new_text[: -len(stop_str)].strip()
+                        prepend_space = False
+                    elif prepend_space:
+                        new_text = " " + new_text
+                        prepend_space = False
                 if len(new_text):
                     yield new_text
             if prepend_space:
